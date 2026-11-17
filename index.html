@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Found</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  html, body { cursor: none; touch-action: none; overscroll-behavior: none; user-select: none; -webkit-touch-callout: none; margin: 0; height: 100%; }
+  :root {
+    --blue: #1129e2;
+    --ink: #ffffff;
+    --ink-70: rgba(255,255,255,0.7);
+    --glass: rgba(255,255,255,0.1);
+    --u: min(calc(100vw / 2000), calc(100dvh / 1125));
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--blue); color: var(--ink); font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; }
+  .page { width: 100vw; height: 100dvh; position: relative; }
+
+  .frame { position: absolute; inset: 0; user-select: none; }
+  .frame, .frame * { user-select: none; }
+
+  /* nav */
+  .top-nav {
+    position: absolute;
+    left: max(16px, 7vw); right: max(16px, 7vw);
+    top: max(12px, calc(38 / 11.25 * 1dvh));
+    height: max(40px, calc(56 * var(--u)));
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; position: relative; }
+  .logo-folders { position: relative; width: max(40px, calc(157 * var(--u))); height: max(40px, calc(44 * var(--u))); }
+  .logo-folders svg { position: absolute; left: 0; }
+  .logo-folders .back { top: calc(6.33 * var(--u)); width: max(40px, calc(53 * var(--u))); height: calc(41 * var(--u)); }
+  .logo-folders .front { top: calc(12.33 * var(--u)); width: max(40px, calc(53 * var(--u))); height: calc(34 * var(--u)); }
+  .logo-word {
+    font-size: max(28px, calc(36 * var(--u)));
+    line-height: calc(44 * var(--u));
+    letter-spacing: -0.08em; font-weight: 500;
+  }
+  .nav-links { display: flex; gap: 32px; font-size: max(15px, calc(22 * var(--u))); letter-spacing: -0.08em; white-space: nowrap; }
+  .nav-links a { color: var(--ink); text-decoration: none; }
+  .nav-links a.active { font-weight: 500; text-decoration: line-through; }
+  .nav-right { display: flex; gap: 32px; width: max(120px, calc(157 * var(--u))); justify-content: flex-end; align-items: center; }
+
+  .icon-btn { background: none; border: 0; padding: 0; cursor: pointer; touch-action: manipulation; display: inline-flex; }
+
+  /* big wordmark */
+  .found {
+    position: absolute; left: 50%; top: calc(547 / 11.25 * 1dvh - 48 * var(--u));
+    transform: translate(-50%, -50%);
+    font-size: max(120px, calc(350 * var(--u)));
+    line-height: calc(240 * var(--u));
+    letter-spacing: -0.1em; text-indent: -0.1em;
+    font-weight: 400; white-space: nowrap;
+  }
+  .found .o { color: transparent; }
+  .over { position: absolute; inset: 0; pointer-events: none; }
+  .over .found .o { color: var(--ink); }
+
+  .mug, .ibook, .book, .tee { position: absolute; }
+  .mug { left: calc(205 / 20 * 1vw); top: calc(359 / 11.25 * 1dvh - 48 * var(--u)); width: max(120px, calc(241 * var(--u))); }
+  .ibook { right: calc(162 / 20 * 1vw); top: calc(323 / 11.25 * 1dvh); width: max(150px, calc(312 * var(--u))); }
+  .book { right: calc(376 / 20 * 1vw); top: calc(689.5 / 11.25 * 1dvh); width: max(140px, calc(293 * var(--u))); }
+  .tee { left: 50%; transform: translateX(-50%); bottom: 0; width: max(130px, calc(250 * var(--u))); transform-origin: 50% 100%; }
+
+  .mug svg, .ibook svg, .book svg, .tee svg { width: 100%; height: auto; display: block; }
+
+  /* radio player */
+  .player {
+    position: absolute;
+    left: max(16px, 7vw); top: calc(509 / 11.25 * 1dvh - 48 * var(--u));
+    width: max(240px, calc(291 * var(--u))); height: max(140px, calc(172 * var(--u)));
+    padding: 16px; border-radius: 24px; display: flex; flex-direction: column; gap: 12px;
+    background: var(--glass);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+  }
+  .player .head { display: flex; align-items: center; gap: 10px; }
+  .player .art { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,.2); flex: none; }
+  .player .meta { flex: 1; min-width: 0; }
+  .player .title { font-size: 18px; font-weight: 600; line-height: 1.1; }
+  .player .sub { font-size: 12px; color: var(--ink-70); }
+  .player .heart { width: 20px; height: 20px; opacity: .9; }
+  .player .bar { height: 4px; border-radius: 2px; background: rgba(255,255,255,.2); overflow: hidden; position: relative; }
+  .player .bar .fill { height: 100%; width: 46%; background: #fff; border-radius: 2px; }
+  .player .bar.playing .fill {
+    width: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,.35), #fff 40%, rgba(255,255,255,.35) 80%);
+    background-size: 200% 100%;
+    animation: flow 2.4s linear infinite;
+  }
+  @keyframes flow { from { background-position: 0 0; } to { background-position: -200% 0; } }
+  .player .times { display: flex; justify-content: space-between; font-size: 10px; font-weight: 600; color: var(--ink-70); font-variant-numeric: tabular-nums; }
+  .player .times .live { display: inline-flex; align-items: center; gap: 4px; }
+  .player .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.5); }
+  .player .dot.live { background: #ff5a5a; animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+  .player .controls { display: flex; align-items: center; gap: 14px; }
+  .player .controls button { background: none; border: 0; padding: 0; cursor: pointer; touch-action: manipulation; color: #fff; display: inline-flex; }
+  .player .controls .low { opacity: .55; }
+  .player .controls .play { width: 48px; height: 48px; border-radius: 50%; background: #fff; display: inline-flex; align-items: center; justify-content: center; }
+  .player .controls .play .bars { display: flex; gap: 5px; }
+  .player .controls .play .bars i { width: 4.5px; height: 16px; background: var(--blue); border-radius: 2px; display: block; }
+  .player .controls .play .tri { width: 0; height: 0; border-left: 18px solid var(--blue); border-top: 11px solid transparent; border-bottom: 11px solid transparent; margin-left: 4px; }
+
+  /* headline/tagline */
+  .cabinet {
+    position: absolute; left: max(16px, 7vw); top: calc(775 / 11.25 * 1dvh);
+    width: calc(396 * var(--u));
+    font-size: max(34px, calc(80 * var(--u))); line-height: 1; letter-spacing: -0.1em;
+  }
+  .tagline {
+    position: absolute; left: max(16px, 7vw); top: calc(959 / 11.25 * 1dvh);
+    font-size: max(14px, calc(24 * var(--u))); line-height: calc(26 * var(--u));
+    letter-spacing: -0.06em; color: var(--ink-70);
+  }
+
+  #spider-instructions {
+    position: fixed; right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom));
+    font: 11px/1.5 Arial; letter-spacing: .02em; color: rgba(255,255,255,.65);
+    z-index: 5; text-align: right; pointer-events: none;
+  }
+
+  .web-layer { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+
+  /* responsive */
+  @media (min-aspect-ratio: 1/1) and (max-height: 560px) {
+    :root { --u: calc(100dvh / 900); }
+    .tagline, .mug { display: none; }
+    .book { right: calc(120 / 20 * 1vw); }
+  }
+  @media (min-aspect-ratio: 1/1) and (max-width: 1100px) {
+    .nav-links { display: none; }
+  }
+  @media (max-aspect-ratio: 1/1) {
+    :root { --u: min(100vw / 560, 1px); }
+    .nav-links { display: none; }
+    .top-nav { top: 16px; }
+    .tee { width: calc(226 * var(--u)); bottom: 0; }
+    .tagline {
+      bottom: calc(226 * var(--u) + 16px); top: auto; left: 16px; right: 16px;
+      font-size: max(13px, calc(26 * var(--u))); line-height: 1.2; width: auto;
+    }
+    .cabinet { bottom: calc(288 * var(--u) + 32px); top: auto; left: 16px; font-size: max(34px, calc(80 * var(--u))); }
+    .player { bottom: calc(448 * var(--u) + 56px); top: auto; left: 16px; }
+    .book { right: 3vw; bottom: calc(440 * var(--u) + 50px); top: auto; width: calc(210 * var(--u)); }
+    .found {
+      top: min(31dvh, calc(100dvh - 700 * var(--u) - 56px));
+      font-size: max(80px, calc(195 * var(--u))); line-height: calc(150 * var(--u));
+    }
+    .mug { left: 2vw; top: calc(56px + 1dvh); width: calc(165 * var(--u)); }
+    .ibook { right: 3vw; top: calc(50px + 1dvh); width: calc(165 * var(--u)); }
+  }
+  @media (max-aspect-ratio: 1/1) and (max-height: 700px) {
+    .mug, .ibook { display: none; }
+  }
+  @media (hover: none) and (pointer: coarse) {
+    #spider-instructions { font-size: 10.5px; line-height: 1.6; }
+  }
+</style>
+</head>
+<body>
+<div class="page" id="page">
+  <div class="frame" id="frame">
+
+    <nav class="top-nav">
+      <div class="logo">
+        <div class="logo-folders" data-web-anchor>
+          <svg class="back" viewBox="0 0 53 41" fill="none"><path d="M3 10 L22 4 L40 6 L49 13 L49 38 L36 38 L29 24 L12 24 L9 38 L3 38 Z" fill="rgba(255,255,255,.15)" stroke="#fff" stroke-width="1.2"/><path d="M14 12 L30 10 L45 17 L45 33 L35 33 L29 25 L18 25 L16 33 L14 33 Z" fill="rgba(255,255,255,.1)" stroke="#fff" stroke-width="1"/></svg>
+          <svg class="front" viewBox="0 0 53 34" fill="none"><path d="M4 8 L22 3 L40 5 L49 12 L49 31 L37 31 L30 23 L13 23 L10 31 L4 31 Z" fill="rgba(255,255,255,.22)" stroke="#fff" stroke-width="1.2"/></svg>
+        </div>
+        <span class="logo-word" data-web-anchor>found</span>
+      </div>
+      <div class="nav-links">
+        <a href="#" class="active" data-web-anchor>home</a>
+        <a href="#" data-web-anchor>archive</a>
+        <a href="#" data-web-anchor>oddities</a>
+        <a href="#" data-web-anchor>experiments</a>
+        <a href="#" data-web-anchor>the drawer</a>
+        <a href="#" data-web-anchor>about</a>
+        <a href="#" data-web-anchor>contact</a>
+      </div>
+      <div class="nav-right">
+        <button class="icon-btn" data-web-anchor aria-label="search"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="11" cy="11" r="6.5" stroke="#fff" stroke-width="1.8"/><path d="M16 16 L22 22" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+        <button class="icon-btn" data-web-anchor aria-label="menu"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M4 8 H22 M4 13 H22 M4 18 H22" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      </div>
+    </nav>
+
+    <div class="found" data-web-anchor><span>f</span><span class="o">o</span><span>und</span></div>
+
+    <img class="mug" data-web-anchor alt="Main Character mug" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 241 220'%3E%3Cpath d='M60 70 C60 30 120 25 150 40 C180 55 190 80 185 110 C180 140 160 160 130 170 C100 180 70 175 60 150 C50 125 50 95 60 70 Z' fill='%23ffffff' opacity='.85'/%3E%3Cpath d='M185 100 C210 90 222 110 218 135 C214 160 196 168 180 160' stroke='%23ffffff' stroke-width='12' fill='none' opacity='.85'/%3E%3Ctext x='115' y='115' font-family='Georgia, serif' font-style='italic' font-size='22' fill='%231129e2' text-anchor='middle' transform='rotate(-6 115 115)'%EMain%20Character%3C/text%3E%3C/svg%3E"/>
+
+    <img class="ibook" data-web-anchor alt="iBook in glass sleeve" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 312 377'%3E%3Cg opacity='.5'%3E%3Crect x='30' y='30' width='252' height='317' rx='18' fill='rgba(255,255,255,.06)' stroke='%23fff' stroke-width='1.5'/%3E%3C/g%3E%3Crect x='58' y='64' width='196' height='128' rx='10' fill='%23d8d8d8'/%3E%3Crect x='58' y='204' width='196' height='96' rx='8' fill='%23bdbdbd'/%3E%3Crect x='78' y='86' width='120' height='8' rx='4' fill='%23999999'/%3E%3Crect x='78' y='104' width='150' height='6' rx='3' fill='%23a8a8a8'/%3E%3Crect x='78' y='118' width='120' height='6' rx='3' fill='%23a8a8a8'/%3E%3Crect x='78' y='222' width='150' height='6' rx='3' fill='%23999999'/%3E%3Crect x='78' y='238' width='120' height='6' rx='3' fill='%23a8a8a8'/%3E%3Crect x='78' y='252' width='130' height='6' rx='3' fill='%23a8a8a8'/%3E%3Ccircle cx='132' cy='278' r='10' fill='%23f0f0f0'/%3E%3Ccircle cx='182' cy='278' r='10' fill='%23f0f0f0'/%3E%3Crect x='120' y='276' width='74' height='4' rx='2' fill='%23eeeeee'/%3E%3C/svg%3E"/>
+
+    <img class="book" data-web-anchor alt="Book and iPod" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 293 322'%3E%3Cg opacity='.5'%3E%3Crect x='28' y='24' width='238' height='274' rx='16' fill='rgba(255,255,255,.06)' stroke='%23fff' stroke-width='1.5'/%3E%3C/g%3E%3Cpath d='M60 40 C90 30 190 30 220 44 L230 290 C200 276 95 276 62 288 Z' fill='%23e8b7c8'/%3E%3Cpath d='M70 60 L180 56 L182 150 L72 154 Z' fill='%23d69cb2' opacity='.7'/%3E%3Crect x='180' y='170' width='34' height='78' rx='9' fill='%23f4f4f6' stroke='%23ccc' stroke-width='1'/%3E%3Ccircle cx='197' cy='188' r='7' fill='%23e8e8ea' stroke='%23bbb' stroke-width='1'/%3E%3Crect x='188' y='204' width='18' height='3' rx='1.5' fill='%23bbb'/%3E%3Crect x='188' y='212' width='18' height='3' rx='1.5' fill='%23bbb'/%3E%3Crect x='188' y='220' width='12' height='3' rx='1.5' fill='%23bbb'/%3E%3C/svg%3E"/>
+
+    <img class="tee" data-web-anchor data-stick="bottom" alt="CALL MY LAWYER t-shirt" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 250 226'%3E%3Cpath d='M70 30 L50 22 L18 60 L40 84 L46 78 L50 200 L200 200 L204 78 L210 84 L232 60 L200 22 L180 30 C165 55 85 55 70 30 Z' fill='%23ffffff' opacity='.92'/%3E%3Ctext x='125' y='130' font-family='Georgia, serif' font-style='italic' font-size='17' fill='%231129e2' text-anchor='middle'%3ECALL%20MY%20LAWYER%3C/text%3E%3Ctext x='125' y='156' font-family='Georgia, serif' font-style='italic' font-size='15' fill='%231129e2' text-anchor='middle'%3E(888)%20799-2021%3C/text%3E%3C/svg%3E"/>
+
+    <div class="player" data-web-anchor>
+      <div class="head">
+        <div class="art"></div>
+        <div class="meta">
+          <div class="title">Support the arts</div>
+          <div class="sub">date an artist</div>
+        </div>
+        <svg class="heart" viewBox="0 0 20 20" fill="none"><path d="M10 17 C4 12 2 9 2 6.2 C2 4 4 2.5 6 2.5 C7.6 2.5 9.2 3.5 10 5 C10.8 3.5 12.4 2.5 14 2.5 C16 2.5 18 4 18 6.2 C18 9 16 12 10 17 Z" fill="#fff" opacity=".9"/></svg>
+      </div>
+      <div class="bar" id="playerbar"><div class="fill" id="playerfill"></div></div>
+      <div class="times">
+        <span class="live"><span class="dot" id="playerdot"></span><span id="playerstatus">offline</span></span>
+        <span id="playerstation">—</span>
+      </div>
+      <div class="controls">
+        <button class="low" id="shuffle" aria-label="shuffle"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4 H5 L11 12 H14 M2 12 H5 L7 9.5 M14 4 H11 L9.5 5.8" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button id="prev" aria-label="previous"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M6 5 V19 M18 5 L8 12 L18 19 Z" fill="#fff"/></svg></button>
+        <button class="play" id="play" aria-label="play"><span class="tri" id="playicon"></span></button>
+        <button id="next" aria-label="next"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 5 V19 M6 5 L16 12 L6 19 Z" fill="#fff"/></svg></button>
+        <button class="low" id="repeat" aria-label="repeat"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 8 A5 5 0 1 1 11 4.2 M11 1.5 V4.5 H14" stroke="#fff" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg></button>
+      </div>
+    </div>
+
+    <div class="cabinet" data-web-anchor>the curiosity<br>cabinet</div>
+    <div class="tagline" data-web-anchor>A personal archive of the wonderfully random.</div>
+
+  </div>
+  <canvas class="web-layer" id="web"></canvas>
+  <div class="over" id="over">
+    <div class="found" data-web-anchor><span>f</span><span class="o">o</span><span>und</span></div>
+  </div>
+</div>
+<div id="spider-instructions">Del / Backspace — clear web · Double-click — make the spider jump</div>
+
+<script>
+(() => {
+const W = () => window.innerWidth, H = () => window.innerHeight;
+const page = document.getElementById('page');
+const canvas = document.getElementById('web');
+const ctx = canvas.getContext('2d');
+const frame = document.getElementById('frame');
+const over = document.getElementById('over');
+
+let Wp, Hp, DPR;
+function resize() {
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  Wp = W(); Hp = H();
+  canvas.width = Wp * DPR; canvas.height = Hp * DPR;
+  canvas.style.width = Wp + 'px'; canvas.style.height = Hp + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  sampleAnchors();
+}
+window.addEventListener('resize', resize);
+new ResizeObserver(resize).observe(page);
+
+/* ---------------- camera / scale ---------------- */
+let t = 1;
+function computeScale() {
+  const portrait = Wp < Hp;
+  const short = Hp < 560;
+  if (portrait) t = Math.max(0.78, Math.min(1.1, Wp / 480));
+  else if (short) t = Math.max(0.68, Hp / 620);
+  else t = Math.min(Wp / 1440, Hp / 810);
+  t = Math.max(0.6, Math.min(1.25, t));
+}
+let K = () => 1.63 * t * 0.12;
+let flySize = () => Math.max(0.75, 1.05 * t);
+
+/* ---------------- radio player ---------------- */
+const stations = [
+  { name: 'Groove Salad', url: 'https://ice1.somafm.com/groovesalad-128-mp3' },
+  { name: 'Lush', url: 'https://ice1.somafm.com/lush-128-mp3' },
+  { name: 'Drone Zone', url: 'https://ice1.somafm.com/dronezone-128-mp3' },
+];
+let stationIdx = 0, audio = null, playing = false;
+const elStatus = document.getElementById('playerstatus');
+const elStation = document.getElementById('playerstation');
+const elDot = document.getElementById('playerdot');
+const elFill = document.getElementById('playerfill');
+const elBar = document.getElementById('playerbar');
+const elPlayIcon = document.getElementById('playicon');
+function setStatus(s) {
+  elStatus.textContent = s;
+  elDot.classList.toggle('live', s === 'live');
+}
+function renderPlayIcon() {
+  if (playing) {
+    elPlayIcon.outerHTML = '<span class="bars" id="playicon"><i></i><i></i></span>';
+  } else {
+    elPlayIcon.outerHTML = '<span class="tri" id="playicon"></span>';
+  }
+}
+function stopAudio() { if (audio) { try { audio.pause(); } catch(e){} audio = null; } playing = false; elFill.classList.remove('playing'); setStatus('offline'); elStation.textContent = '—'; renderPlayIcon(); }
+function playStation(i) {
+  stopAudio();
+  stationIdx = (i + stations.length) % stations.length;
+  audio = new Audio(stations[stationIdx].url);
+  audio.preload = 'none';
+  elStation.textContent = stations[stationIdx].name;
+  setStatus('tuning…');
+  audio.play().then(() => { playing = true; elFill.classList.add('playing'); setStatus('live'); renderPlayIcon(); })
+    .catch(() => { elFill.classList.remove('playing'); setStatus('offline'); renderPlayIcon(); });
+}
+document.getElementById('play').addEventListener('click', e => { e.stopPropagation(); if (playing) stopAudio(); else playStation(stationIdx); });
+document.getElementById('next').addEventListener('click', e => { e.stopPropagation(); playStation(stationIdx + 1); });
+document.getElementById('prev').addEventListener('click', e => { e.stopPropagation(); playStation(stationIdx - 1); });
+document.getElementById('shuffle').addEventListener('click', e => { e.stopPropagation(); playStation(Math.floor(Math.random() * stations.length)); });
+document.getElementById('repeat').addEventListener('click', e => { e.stopPropagation(); playStation(stationIdx); });
+
+/* ---------------- anchors ---------------- */
+let anchors = [];
+const maskCanvas = document.createElement('canvas');
+const maskCtx = maskCanvas.getContext('2d');
+function sampleAnchors() {
+  maskCanvas.width = Wp; maskCanvas.height = Hp;
+  maskCtx.clearRect(0, 0, Wp, Hp);
+  anchors = [];
+  const els = frame.querySelectorAll('[data-web-anchor]');
+  els.forEach(el => {
+    const r = el.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) return;
+    const off = document.createElement('canvas');
+    off.width = Math.ceil(r.width * DPR); off.height = Math.ceil(r.height * DPR);
+    const octx = off.getContext('2d');
+    octx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const style = getComputedStyle(el);
+    const disp = style.display;
+    if (el.tagName === 'IMG' || el.querySelector('svg')) {
+      try { octx.drawImage(el, 0, 0, r.width, r.height); } catch(e){}
+      const id = octx.getImageData(0, 0, Math.ceil(r.width), Math.ceil(r.height));
+      let alphaCount = 0, total = id.data.length / 4;
+      for (let i = 3; i < id.data.length; i += 4) if (id.data[i] > 140) alphaCount++;
+      if (alphaCount / total > 0.5) {
+        maskCtx.fillStyle = '#fff';
+        rr(maskCtx, r.left, r.top, r.width, r.height, 14);
+        maskCtx.fill();
+      } else {
+        maskCtx.save();
+        maskCtx.translate(r.left, r.top);
+        maskCtx.drawImage(off, 0, 0, r.width, r.height);
+        maskCtx.restore();
+        const step = 7;
+        for (let y = 0; y < Math.ceil(r.height); y += 1) {
+          for (let x = 0; x < Math.ceil(r.width); x += 1) {
+            const idx = (y * Math.ceil(r.width) + x) * 4 + 3;
+            if (id.data[idx] > 140) {
+              let edge = false;
+              outer: for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+                const nx = x + dx, ny = y + dy;
+                if (nx < 0 || ny < 0 || nx >= Math.ceil(r.width) || ny >= Math.ceil(r.height)) { edge = true; break outer; }
+                if (id.data[(ny * Math.ceil(r.width) + nx) * 4 + 3] <= 140) { edge = true; break outer; }
+              }
+              if (edge) anchors.push({ x: r.left + x, y: r.top + y });
+            }
+          }
+        }
+        return;
+      }
+    } else if (disp === 'block' || disp === 'flex' || disp === 'inline-block' || disp === 'grid') {
+      maskCtx.fillStyle = '#fff';
+      rr(maskCtx, r.left, r.top, r.width, r.height, 14);
+      maskCtx.fill();
+    } else {
+      octx.font = style.font;
+      octx.fillStyle = '#fff';
+      octx.textAlign = 'left';
+      octx.textBaseline = 'alphabetic';
+      octx.fillText(el.textContent, 0, r.height * 0.8);
+      const id = octx.getImageData(0, 0, Math.ceil(r.width), Math.ceil(r.height));
+      for (let y = 0; y < Math.ceil(r.height); y += 1) {
+        for (let x = 0; x < Math.ceil(r.width); x += 1) {
+          const idx = (y * Math.ceil(r.width) + x) * 4 + 3;
+          if (id.data[idx] > 128) {
+            let edge = false;
+            outer: for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+              const nx = x + dx, ny = y + dy;
+              if (nx < 0 || ny < 0 || nx >= Math.ceil(r.width) || ny >= Math.ceil(r.height)) { edge = true; break outer; }
+              if (id.data[(ny * Math.ceil(r.width) + nx) * 4 + 3] <= 128) { edge = true; break outer; }
+            }
+            if (edge) {
+              anchors.push({ x: r.left + x, y: r.top + y });
+              maskCtx.fillRect(r.left + x, r.top + y, 1, 1);
+            }
+          }
+        }
+      }
+      return;
+    }
+    const step = 7;
+    for (let x = 0; x <= r.width; x += step) { anchors.push({ x: r.left + x, y: r.top }); anchors.push({ x: r.left + x, y: r.top + r.height }); }
+    for (let y = 0; y <= r.height; y += step) { anchors.push({ x: r.left, y: r.top + y }); anchors.push({ x: r.left + r.width, y: r.top + y }); }
+  });
+}
+function rr(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+document.fonts.ready.then(sampleAnchors);
+window.addEventListener('load', sampleAnchors);
+setTimeout(sampleAnchors, 600);
+
+/* ---------------- silk ---------------- */
+class Rope {
+  constructor(x1, y1, x2, y2) {
+    this.n = 12;
+    this.points = [];
+    this.old = [];
+    for (let i = 0; i <= this.n; i++) {
+      const f = i / this.n;
+      this.points.push([x1 + (x2 - x1) * f, y1 + (y2 - y1) * f]);
+      this.old.push([this.points[i][0], this.points[i][1]]);
+    }
+    this.x1 = x1; this.y1 = y1; this.x2 = x2; this.y2 = y2;
+    this.len = Math.hypot(x2 - x1, y2 - y1);
+    this.rest = this.len / this.n * 1.012;
+    this.thick = 1.25;
+    this.fade = 1;
+    this.dew = [];
+    this.glint = Math.random();
+    this.drops = Math.floor((this.len / 55) * (0.4 + Math.random()));
+    for (let i = 0; i < this.drops; i++) {
+      this.dew.push({ f: Math.random(), r: 1.6 + Math.random() * 4.6, v: 0, fall: false, vy: 0, x: 0, y: 0, splat: false });
+    }
+  }
+  step(dt, wind) {
+    const damp = 0.975;
+    for (let i = 0; i <= this.n; i++) {
+      const p = this.points[i], o = this.old[i];
+      const vx = (p[0] - o[0]) * damp, vy = (p[1] - o[1]) * damp;
+      o[0] = p[0]; o[1] = p[1];
+      p[0] += vx; p[1] += vy;
+      if (i > 0 && i < this.n) {
+        p[1] += 110 * dt * dt;
+        p[0] += wind * dt * dt;
+      }
+    }
+    this.points[0][0] = this.x1; this.points[0][1] = this.y1;
+    this.points[this.n][0] = this.x2; this.points[this.n][1] = this.y2;
+    for (let it = 0; it < 4; it++) {
+      for (let i = 0; i < this.n; i++) {
+        const a = this.points[i], b = this.points[i + 1];
+        let dx = b[0] - a[0], dy = b[1] - a[1];
+        let d = Math.hypot(dx, dy) || 0.001;
+        const diff = (d - this.rest) / d;
+        const ox = dx * 0.5 * diff, oy = dy * 0.5 * diff;
+        if (i === 0) { b[0] -= ox * 2; b[1] -= oy * 2; }
+        else if (i === this.n - 1) { a[0] += ox * 2; a[1] += oy * 2; }
+        else { a[0] += ox; a[1] += oy; b[0] -= ox; b[1] -= oy; }
+      }
+    }
+    const px = fly ? fly.x : pointer.x, py = fly ? fly.y : pointer.y;
+    for (let i = 1; i < this.n; i++) {
+      const p = this.points[i];
+      const dx = p[0] - px, dy = p[1] - py, d = Math.hypot(dx, dy);
+      if (d < 36 && d > 0.001) {
+        const f = (36 - d) / 36 * 0.6;
+        p[0] += dx / d * f; p[1] += dy / d * f;
+      }
+    }
+    for (const d of this.dew) {
+      if (d.fall) {
+        d.vy += 1100 * dt; d.y += d.vy * dt;
+        if (d.y > Hp + 40) d.splat = true;
+        continue;
+      }
+      const i0 = Math.floor(d.f * this.n), i1 = Math.min(this.n, i0 + 1);
+      const a = this.points[i0], b = this.points[i1];
+      const dx = b[0] - a[0], dy = b[1] - a[1];
+      const slope = dy / (Math.hypot(dx, dy) || 0.001);
+      d.v += slope * 9 * dt;
+      d.v *= 0.95;
+      d.f += d.v * dt / this.rest;
+      if (d.f < 0) d.f = 0;
+      if (d.f > 1) { d.fall = true; d.x = this.x2; d.y = this.y2; d.vy = 0; }
+      if (Math.abs(slope) > 0.8 && Math.random() < 0.02) { d.fall = true; d.x = a[0]; d.y = a[1]; d.vy = 0; }
+    }
+  }
+  vibrate(strength, radius, cx, cy) {
+    for (const p of this.points) {
+      const d = Math.hypot(p[0] - cx, p[1] - cy);
+      if (d < radius) {
+        const f = strength * (1 - d / radius);
+        p[0] += (Math.random() - 0.5) * 2 * f;
+        p[1] += (Math.random() - 0.5) * 2 * f;
+      }
+    }
+    for (const d of this.dew) if (!d.fall && Math.random() < 0.35) { d.fall = true; const i0 = Math.floor(d.f * this.n); d.x = this.points[i0][0]; d.y = this.points[i0][1]; d.vy = 0; }
+  }
+  draw() {
+    const alpha = this.fade;
+    if (alpha <= 0.01) return;
+    const seg = Math.max(1, Math.floor(this.n * (1 - alpha)));
+    for (let i = 0; i < this.n - seg; i++) {
+      const a = this.points[i], b = this.points[i + 1];
+      const thick = this.thick * (0.9 - 0.35 * Math.sin(Math.PI * i / 12));
+      ctx.strokeStyle = `rgba(255,255,255,${0.06 * alpha})`;
+      ctx.lineWidth = thick * 4;
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      ctx.strokeStyle = `rgba(255,255,255,${0.8 * alpha})`;
+      ctx.lineWidth = thick;
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      const ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
+      const P = 0.5 + 0.5 * Math.sin(2 * ang + 0.3 * time + i);
+      ctx.strokeStyle = `hsla(${190 + 150 * P}, 100%, 74%, ${(0.12 + 0.3 * P * P * P) * alpha})`;
+      ctx.lineWidth = thick * 0.7;
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      const nx = -(b[1] - a[1]) / (Math.hypot(b[0] - a[0], b[1] - a[1]) || 1);
+      const ny = (b[0] - a[0]) / (Math.hypot(b[0] - a[0], b[1] - a[1]) || 1);
+      ctx.strokeStyle = `rgba(255,255,255,${0.38 * alpha})`;
+      ctx.lineWidth = thick * 0.45;
+      ctx.beginPath(); ctx.moveTo(a[0] + nx * 1.1, a[1] + ny * 1.1); ctx.lineTo(b[0] + nx * 1.1, b[1] + ny * 1.1); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(a[0] - nx * 0.9, a[1] - ny * 0.9); ctx.lineTo(b[0] - nx * 0.9, b[1] - ny * 0.9); ctx.stroke();
+      if (Math.random() < 0.5) {
+        const mf = Math.random(), mx = a[0] + (b[0] - a[0]) * mf, my = a[1] + (b[1] - a[1]) * mf;
+        const hl = (0.5 + Math.random() * 2.2) * thick;
+        ctx.strokeStyle = `rgba(255,255,255,${0.55 * alpha})`;
+        ctx.lineWidth = thick * 0.35;
+        const hx = nx * hl * (Math.random() < 0.5 ? 1 : -1), hy = ny * hl * (Math.random() < 0.5 ? 1 : -1);
+        ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(mx + hx, my + hy); ctx.stroke();
+      }
+    }
+    if (Math.random() < 0.4) {
+      const f = Math.random(), i0 = Math.floor(f * this.n), a = this.points[i0];
+      ctx.fillStyle = `rgba(138,122,106,${0.6 * alpha})`;
+      for (let i = 0; i < 5; i++) ctx.fillRect(a[0] + (Math.random() - 0.5) * 8, a[1] + (Math.random() - 0.5) * 8, 1.5, 1.5);
+      ctx.fillStyle = `rgba(240,232,220,${0.6 * alpha})`;
+      for (let i = 0; i < 10; i++) { ctx.beginPath(); ctx.arc(a[0] + (Math.random() - 0.5) * 10, a[1] + (Math.random() - 0.5) * 10, 0.7 + Math.random(), 0, 7); ctx.fill(); }
+    }
+    this.glint = (this.glint + 0.6 * 0.016) % 1;
+    const gi = Math.floor(this.glint * this.n), a = this.points[gi], b = this.points[Math.min(this.n, gi + 1)];
+    ctx.strokeStyle = `rgba(255,255,255,${0.9 * alpha})`;
+    ctx.lineWidth = this.thick * 1.6;
+    ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+    for (const d of this.dew) {
+      if (d.splat) continue;
+      let x, y;
+      if (d.fall) { x = d.x; y = d.y; }
+      else {
+        const i0 = Math.floor(d.f * this.n), i1 = Math.min(this.n, i0 + 1);
+        const fr = d.f * this.n - i0;
+        const pa = this.points[i0], pb = this.points[i1];
+        x = pa[0] + (pb[0] - pa[0]) * fr; y = pa[1] + (pb[1] - pa[1]) * fr;
+      }
+      const g = ctx.createRadialGradient(x - d.r * 0.3, y - d.r * 0.3, 0.5, x, y, d.r);
+      g.addColorStop(0, `rgba(255,255,255,${0.95 * alpha})`);
+      g.addColorStop(0.45, `rgba(255,240,220,${0.5 * alpha})`);
+      g.addColorStop(1, `rgba(255,210,150,${0.45 * alpha})`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x, y, d.r, 0, 7); ctx.fill();
+      ctx.fillStyle = `rgba(255,255,255,${0.95 * alpha})`;
+      ctx.beginPath(); ctx.arc(x - d.r * 0.35, y - d.r * 0.35, d.r * 0.25, 0, 7); ctx.fill();
+    }
+  }
+}
+let ropes = [];
+let liveThread = null;
+let liveStart = null;
+
+/* ---------------- spider ---------------- */
+const SP = {
+  pivot: [627, 600], waist: [627, 548], spinneret: [627, 150],
+  legs: [
+    [[470,760],[370,830],[400,1160]],
+    [[460,665],[300,690],[100,955]],
+    [[480,605],[370,580],[55,475]],
+    [[490,560],[360,420],[410,52]],
+  ],
+};
+function legRig(leg) {
+  return leg.map(p => [1254 - p[0], p[1]]);
+}
+function toBody(x, y) { return [y - 600, -(x - 627)]; }
+function fromBody(bx, by) { return [627 - by, bx + 600]; }
+
+const spider = {
+  x: 0, y: 0, heading: 0,
+  vx: 0, vy: 0,
+  rest: false, qt: 0, sleep: 0, blinkT: 0, nextBlink: 1.5,
+  phase: 0, lt: 0, jumpH: 0, jumping: false, jumpDur: 0, jumpT: 0,
+  jumpFrom: [0,0], jumpTo: [0,0], jumpPeak: 0,
+  intro: 0, introPhase: 0,
+  feet: [], footT: [], footFrom: [], footTo: [],
+  caught: null, catchT: 0,
+};
+
+function initSpider() {
+  spider.x = Wp / 2; spider.y = -760 * K();
+  spider.heading = Math.PI / 2;
+  spider.intro = 0; spider.introPhase = 0;
+  spider.feet = []; spider.footT = []; spider.footFrom = []; spider.footTo = [];
+  for (let i = 0; i < 8; i++) {
+    const side = i < 4 ? 0 : 1;
+    const leg = side === 0 ? SP.legs[i] : legRig(SP.legs[i - 4]);
+    const [hx, hy] = toBody(leg[0][0], leg[0][1]);
+    const [fx, fy] = toBody(leg[2][0], leg[2][1]);
+    const fxw = spider.x + fx * K() * 0.6;
+    const fyw = spider.y + fy * K() * 0.6;
+    spider.feet.push({ wx: 0, wy: 0, fx: fxw, fy: fyw, len: Math.hypot(fx, fy) * K() });
+    spider.footT.push(1); spider.footFrom.push([fxw, fyw]); spider.footTo.push([fxw, fyw]);
+  }
+  liveStart = { x: Wp / 2, y: -2 };
+  liveThread = new Rope(liveStart.x, liveStart.y, spider.x, spider.y);
+}
+
+function legIK(hip, foot, a, b, outward) {
+  const dx = foot[0] - hip[0], dy = foot[1] - hip[1];
+  const d = Math.min(Math.hypot(dx, dy), a + b - 1);
+  const ang = Math.atan2(dy, dx);
+  const cos = (a*a + d*d - b*b) / (2 * a * d);
+  const bend = Math.acos(Math.max(-1, Math.min(1, cos))) * (outward ? 1 : -1);
+  const knee = [hip[0] + Math.cos(ang + bend) * a, hip[1] + Math.sin(ang + bend) * a];
+  return { knee, angle: ang + bend, outward };
+}
+
+let fly = null;
+const pointer = { x: -100, y: -100, down: false, lastMove: 0, holdT: 0, movedSinceSleep: false, active: false };
+
+function updateSpider(dt) {
+  const k = K();
+  const tx = fly ? fly.x : pointer.x, ty = fly ? fly.y : pointer.y;
+  let targetX = tx, targetY = ty;
+  if (fly) {
+    const dx = tx - spider.x, dy = ty - spider.y;
+    const d = Math.hypot(dx, dy);
+    const gap = 560 * k;
+    if (d > gap) { targetX = spider.x + dx / d * (d - gap); targetY = spider.y + dy / d * (d - gap); }
+  }
+  if (spider.jumping) {
+    spider.jumpT += dt / spider.jumpDur;
+    const f = spider.jumpT;
+    if (f >= 1) {
+      spider.jumping = false;
+      spider.x = spider.jumpTo[0]; spider.y = spider.jumpTo[1];
+      spider.lt = 1;
+      vibrateWeb(140, 3, spider.x, spider.y);
+      nudgeObjects(20);
+    } else {
+      const e = f < 0.5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
+      const h = Math.sin(f * Math.PI) * spider.jumpPeak;
+      spider.x = spider.jumpFrom[0] + (spider.jumpTo[0] - spider.jumpFrom[0]) * e;
+      spider.y = spider.jumpFrom[1] + (spider.jumpTo[1] - spider.jumpFrom[1]) * e;
+      spider.jumpH = h;
+    }
+  } else {
+    const dx = targetX - spider.x, dy = targetY - spider.y;
+    const d = Math.hypot(dx, dy);
+    const want = Math.min(760, Math.max(0, d - 1) * 4);
+    const ease = 1 - Math.exp(-10 * dt);
+    const vx = dx / (d || 1) * want * ease;
+    const vy = dy / (d || 1) * want * ease;
+    spider.vx = vx; spider.vy = vy;
+    spider.x += vx; spider.y += vy;
+    spider.x = Math.max(10, Math.min(Wp - 10, spider.x));
+    spider.y = Math.max(10, Math.min(Hp - 10, spider.y));
+    const wantA = Math.atan2(dy, dx);
+    let da = wantA - spider.heading;
+    while (da > Math.PI) da -= 2 * Math.PI;
+    while (da < -Math.PI) da += 2 * Math.PI;
+    spider.heading += da * (1 - Math.exp(-8 * dt));
+    spider.jumpH = Math.max(0, spider.jumpH - spider.jumpH * 6 * dt);
+  }
+  if (spider.intro < 1) {
+    spider.introPhase += dt;
+    if (spider.introPhase > 3) {
+      const f = Math.min(1, (spider.introPhase - 3) / 2.3);
+      spider.y = -760 * k + (Hp / 2 + 760 * k) * (1 - Math.pow(1 - f, 2.4));
+      spider.x = Wp / 2 + Math.sin(1.8 * f) * 8 * Math.exp(-0.5 * f);
+      if (f >= 1) {
+        spider.intro = 1;
+        spider.lt = 1;
+        vibrateWeb(140, 2, spider.x, spider.y);
+        spider.introPhase = 0;
+      }
+    }
+  }
+  const group = Math.floor(time * 2) % 2;
+  for (let i = 0; i < spider.feet.length; i++) {
+    const side = i < 4 ? 0 : 1;
+    const leg = side === 0 ? SP.legs[i] : legRig(SP.legs[i - 4]);
+    const hipB = toBody(leg[0][0], leg[0][1]);
+    const footB = toBody(leg[2][0], leg[2][1]);
+    const a = Math.hypot(leg[1][0] - leg[0][0], leg[1][1] - leg[0][1]) * k;
+    const b = Math.hypot(leg[2][0] - leg[1][0], leg[2][1] - leg[1][1]) * k;
+    const hipW = [spider.x + fromBody(hipB[0], hipB[1])[0] * k * 0.12, spider.y + fromBody(hipB[0], hipB[1])[1] * k * 0.12];
+    const footW = [spider.x + footB[0] * k * 0.6, spider.y + footB[1] * k * 0.6];
+    const f = spider.feet[i];
+    const poseX = footW[0] + spider.vx * 0.09;
+    const poseY = footW[1] + spider.vy * 0.09;
+    const front = i % 4 < 2;
+    const trig = front ? 130 * k * 0.7 : 130 * k;
+    const dFoot = Math.hypot(f.fx - poseX, f.fy - poseY);
+    const speed = Math.hypot(spider.vx, spider.vy);
+    const stepping = spider.footT[i] < 1;
+    const overext = dFoot > Math.hypot(footB[0], footB[1]) * k * 0.98;
+    const anyOther = spider.footT.some((t, idx) => idx !== i && t < 1);
+    const nearlyStopped = speed < 20 && dFoot > trig * 0.3;
+    const behindHip = front && (poseX - hipW[0]) * Math.cos(spider.heading) < 0;
+    if (!stepping && (dFoot > trig || nearlyStopped || overext || behindHip)) {
+      const canStep = !anyOther || overext || dFoot > trig * 1.6;
+      if (canStep) {
+        spider.footFrom[i] = [f.fx, f.fy];
+        spider.footTo[i] = [poseX, poseY];
+        spider.footT[i] = 0;
+      }
+    }
+    if (spider.footT[i] < 1) {
+      const dur = Math.max(0.055, Math.min(0.15, 0.15 - speed / 3200));
+      spider.footT[i] += dt / dur;
+      if (spider.footT[i] >= 1) {
+        spider.footT[i] = 1;
+        f.fx = spider.footTo[i][0]; f.fy = spider.footTo[i][1];
+        vibrateWeb(30, 0.6, f.fx, f.fy);
+      } else {
+        const e = 1 - Math.pow(1 - spider.footT[i], 3);
+        f.fx = spider.footFrom[i][0] + (spider.footTo[i][0] - spider.footFrom[i][0]) * e;
+        f.fy = spider.footFrom[i][1] + (spider.footTo[i][1] - spider.footFrom[i][1]) * e;
+      }
+    }
+  }
+  const speedNow = Math.hypot(spider.vx, spider.vy);
+  const still = speedNow < 25 && !spider.jumping;
+  if (still) spider.qt = Math.min(1, spider.qt + 3.2 * dt);
+  else spider.qt = Math.max(0, spider.qt - 6 * dt);
+  const feetPlanted = spider.footT.every(t => t >= 1);
+  const rest = still && feetPlanted && spider.qt > 0.5;
+  spider.rest = rest;
+  if (rest && spider.qt > 0.99) {
+    spider.sleep = Math.min(1, spider.sleep + dt / 1.6);
+  } else {
+    if (pointer.movedSinceSleep && spider.sleep > 0.6) {
+      spider.sleep = 0;
+      spider.jumping = true;
+      spider.jumpFrom = [spider.x, spider.y];
+      spider.jumpTo = [spider.x + 20, spider.y - 26];
+      spider.jumpPeak = 26;
+      spider.jumpDur = 0.3; spider.jumpT = 0;
+      vibrateWeb(60, 1, spider.x, spider.y);
+      pointer.movedSinceSleep = false;
+    } else {
+      spider.sleep = Math.max(0, spider.sleep - dt * 2);
+    }
+  }
+  if (spider.sleep < 0.6) {
+    spider.nextBlink -= dt;
+    if (spider.nextBlink <= 0) {
+      spider.blinkT = 1;
+      spider.nextBlink = 3 + Math.random() * 2;
+    }
+    if (spider.blinkT > 0) spider.blinkT -= dt;
+  }
+  spider.phase += dt * (3.2 - 1.8 * spider.sleep);
+  spider.lt = Math.max(0, spider.lt - 4 * dt);
+  if (spider.caught) {
+    spider.catchT -= dt;
+    if (spider.catchT <= 0) {
+      spider.caught = null;
+      if (fly) { fly.x += (Math.random() - 0.5) * 300; fly.y -= 150; }
+    }
+  }
+}
+
+function vibrateWeb(radius, strength, cx, cy) {
+  for (const r of ropes) r.vibrate(strength, radius, cx, cy);
+  if (liveThread) liveThread.vibrate(strength, radius, cx, cy);
+}
+
+/* ---------------- fly ---------------- */
+const flyObj = {
+  x: 0, y: 0, prev: [0, 0], ang: 0, landed: 0, t: 0, recoil: 0, dx: 0, dy: 0,
+};
+function initFly() {
+  flyObj.x = pointer.x; flyObj.y = pointer.y;
+  flyObj.prev = [pointer.x, pointer.y];
+}
+function updateFly(dt) {
+  flyObj.t += dt;
+  const ease = 1 - Math.exp(-(28 - 20 * flyObj.recoil) * dt);
+  const nx = pointer.x + (flyObj.x - pointer.x) * (1 - ease);
+  const ny = pointer.y + (flyObj.y - pointer.y) * (1 - ease);
+  flyObj.prev = [flyObj.x, flyObj.y];
+  flyObj.x = nx; flyObj.y = ny;
+  const vx = flyObj.x - flyObj.prev[0], vy = flyObj.y - flyObj.prev[1];
+  const sp = Math.hypot(vx, vy);
+  if (sp > 60) flyObj.ang = Math.atan2(vy, vx);
+  if (sp < 2) flyObj.landed = Math.min(1, flyObj.landed + 3 * dt);
+  else flyObj.landed = Math.max(0, flyObj.landed - 10 * dt);
+  flyObj.recoil = Math.max(0, flyObj.recoil - dt);
+  const jx = (Math.sin(23.1 * flyObj.t) + 0.6 * Math.sin(37.7 * flyObj.t + 1.3)) * 2.2 * (1 - flyObj.landed);
+  const jy = (Math.sin(29.3 * flyObj.t + 0.7) + 0.6 * Math.sin(41.9 * flyObj.t)) * 2.2 * (1 - flyObj.landed);
+  flyObj.dx = jx; flyObj.dy = jy;
+}
+
+function drawFly() {
+  const s = flySize();
+  const x = flyObj.x + flyObj.dx, y = flyObj.y + flyObj.dy;
+  const hover = 1 - flyObj.landed;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.shadowColor = `rgba(0,0,0,${0.2 + 0.18 * flyObj.landed})`;
+  ctx.shadowBlur = 3 + 9 * hover;
+  ctx.shadowOffsetX = 3 + 14 * hover;
+  ctx.shadowOffsetY = 5 + 26 * hover;
+  ctx.rotate(flyObj.ang);
+  const buzz = spider.caught ? 46 : (flyObj.landed < 0.5 ? 34 : 14);
+  const q = spider.caught ? 1 : (0.5 + 0.5 * Math.sin(flyObj.t * buzz * 2 * Math.PI));
+  const ghost = 4;
+  for (let g = 0; g < ghost; g++) {
+    ctx.save();
+    ctx.rotate(Math.sin((flyObj.t * buzz + g / ghost) * 2 * Math.PI) * 0.9 * q);
+    ctx.scale(1, 1 - 0.25 * q);
+    ctx.fillStyle = 'rgba(220,230,240,.5)';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.ellipse(14 * s, -16 * s, 22 * s, 9 * s, -0.4, 0, 7);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.ellipse(14 * s, 16 * s, 22 * s, 9 * s, 0.4, 0, 7);
+    ctx.fill();
+    ctx.restore();
+  }
+  const bodyG = ctx.createRadialGradient(-4 * s, -3 * s, 1, 0, 0, 30 * s);
+  bodyG.addColorStop(0, '#3a3a3a');
+  bodyG.addColorStop(1, '#141414');
+  ctx.fillStyle = bodyG;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 24 * s, 14 * s, 0, 0, 7);
+  ctx.fill();
+  ctx.fillStyle = '#4a2a1a';
+  ctx.beginPath();
+  ctx.arc(-8 * s, 0, 9 * s, 0, 7);
+  ctx.fill();
+  ctx.fillStyle = '#d43a2a';
+  ctx.beginPath();
+  ctx.arc(-11 * s, 0, 3.2 * s, 0, 7);
+  ctx.fill();
+  ctx.restore();
+}
+
+/* ---------------- objects ---------------- */
+const objects = [];
+function collectObjects() {
+  objects.length = 0;
+  frame.querySelectorAll('[data-web-anchor]').forEach(el => {
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) {
+      objects.push({ el, x: r.left, y: r.top, w: r.width, h: r.height, rot: 0, ox: 0, oy: 0, vx: 0, vy: 0, vr: 0 });
+    }
+  });
+}
+function nudgeObjects(strength) {
+  for (const o of objects) {
+    const r = o.el.getBoundingClientRect();
+    const d = Math.hypot(r.left + o.w/2 - spider.x, r.top + o.h/2 - spider.y);
+    if (d < 400) o.vr += (Math.random() - 0.5) * strength * 0.4;
+  }
+}
+function updateObjects(dt) {
+  const k = K();
+  for (const o of objects) {
+    const r = o.el.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const d = Math.hypot(cx - spider.x, cy - spider.y);
+    const speed = Math.hypot(spider.vx, spider.vy);
+    if (d < 260 * k && speed > 40 && !spider.jumping) {
+      const ox = cx - spider.x, oy = cy - spider.y;
+      const torque = Math.max(-2.5, Math.min(2.5, (ox * spider.vy - oy * spider.vx) / (o.w * o.h))) * 120 * dt;
+      o.vr += torque;
+      o.vx += spider.vx * 0.85 * dt;
+      o.vy += spider.vy * 0.85 * dt;
+    }
+    const damp = Math.exp(-2.8 * dt);
+    o.vx *= damp; o.vy *= damp; o.vr *= damp;
+    o.ox += o.vx; o.oy += o.vy;
+    o.rot += o.vr;
+    const stick = o.el.dataset.stick === 'bottom';
+    if (stick) {
+      if (Math.abs(o.rot) > 8) o.vr += -Math.sign(o.rot) * (Math.abs(o.rot) - 8) * 20 * dt;
+    } else {
+      if (Math.abs(o.rot) > 24) o.vr += -Math.sign(o.rot) * (Math.abs(o.rot) - 24) * 8 * dt;
+      if (Math.hypot(o.ox, o.oy) > 50) { o.vx -= o.ox * 8 * dt; o.vy -= o.oy * 8 * dt; }
+    }
+    o.ox *= Math.exp(-1.5 * dt); o.oy *= Math.exp(-1.5 * dt);
+    if (stick) o.el.style.transform = `translate(-50%, 0) rotate(${o.rot}deg)`;
+    else o.el.style.transform = `translate(${o.ox}px, ${o.oy}px) rotate(${o.rot}deg)`;
+    if (Math.abs(o.vx) + Math.abs(o.vy) + Math.abs(o.vr) < 0.5 && Math.abs(o.ox) + Math.abs(o.oy) + Math.abs(o.rot) < 0.5) {
+      o.el.style.transform = '';
+    }
+  }
+}
+
+/* ---------------- draw spider ---------------- */
+const off = document.createElement('canvas');
+const offctx = off.getContext('2d');
+function drawSpider() {
+  const k = K();
+  const size = 1.63 * t;
+  const scale = k * size;
+  off.width = Math.max(2, Math.ceil(1254 * scale * 1.4));
+  off.height = Math.max(2, Math.ceil(1254 * scale * 1.4));
+  offctx.setTransform(1, 0, 0, 1, 0, 0);
+  offctx.clearRect(0, 0, off.width, off.height);
+  offctx.translate(off.width / 2, off.height / 2);
+  offctx.rotate(spider.heading);
+  offctx.scale(scale, scale);
+  const abdomenBreathe = 1 + Math.sin(spider.phase) * (0.025 + 0.03 * spider.sleep);
+  const squashY = 1 - 0.1 * spider.lt;
+  const bodyScaleX = (2 - squashY) * abdomenBreathe;
+  for (let i = 0; i < 8; i++) {
+    const side = i < 4 ? 0 : 1;
+    const leg = side === 0 ? SP.legs[i] : legRig(SP.legs[i - 4]);
+    const hipB = toBody(leg[0][0], leg[0][1]);
+    const footB = toBody(leg[2][0], leg[2][1]);
+    const aLen = Math.hypot(leg[1][0] - leg[0][0], leg[1][1] - leg[0][1]);
+    const bLen = Math.hypot(leg[2][0] - leg[1][0], leg[2][1] - leg[1][1]);
+    const hip = [hipB[0] * 0.12, hipB[1] * 0.12];
+    let foot = [footB[0] * 0.6, footB[1] * 0.6];
+    const ft = spider.footT[i];
+    const stepping = ft < 1;
+    const lift = stepping ? Math.sin(Math.PI * (1 - ft)) * (i % 4 < 2 ? 12 : 26) : 0;
+    const liftX = side === 0 ? -lift : lift;
+    if (stepping) foot = [foot[0] + liftX, foot[1] + lift];
+    const outward = side === 0 ? 1 : -1;
+    const ik = legIK(hip, foot, aLen, bLen, outward);
+    const width = 92;
+    offctx.lineCap = 'round';
+    offctx.strokeStyle = 'rgba(96,64,42,.92)';
+    offctx.lineWidth = width;
+    offctx.beginPath(); offctx.moveTo(hip[0], hip[1]); offctx.lineTo(ik.knee[0], ik.knee[1]); offctx.stroke();
+    offctx.beginPath(); offctx.moveTo(ik.knee[0], ik.knee[1]); offctx.lineTo(foot[0], foot[1]); offctx.stroke();
+    offctx.lineWidth = 6;
+    offctx.strokeStyle = 'rgba(60,38,26,.8)';
+    for (let h = 0; h < 3; h++) {
+      const f = Math.random();
+      const lx = hip[0] + (ik.knee[0] - hip[0]) * f, ly = hip[1] + (ik.knee[1] - hip[1]) * f;
+      offctx.beginPath(); offctx.moveTo(lx, ly); offctx.lineTo(lx + (Math.random() - 0.5) * 40, ly + (Math.random() - 0.5) * 40); offctx.stroke();
+    }
+  }
+  offctx.save();
+  offctx.translate(0, -55);
+  offctx.scale(bodyScaleX, squashY);
+  const abG = offctx.createRadialGradient(-60, -80, 20, 0, 0, 220);
+  abG.addColorStop(0, '#d8b390');
+  abG.addColorStop(0.55, '#a5763f');
+  abG.addColorStop(1, '#5e3a1e');
+  offctx.fillStyle = abG;
+  offctx.beginPath();
+  offctx.ellipse(0, 0, 220, 205, 0, 0, 7);
+  offctx.fill();
+  offctx.restore();
+  const headAlpha = 1 - spider.qt * 0.85;
+  if (headAlpha > 0.02) {
+    offctx.save();
+    offctx.globalAlpha = headAlpha;
+    const hG = offctx.createRadialGradient(-50, -40, 15, 0, 0, 170);
+    hG.addColorStop(0, '#d8b390');
+    hG.addColorStop(0.6, '#a5763f');
+    hG.addColorStop(1, '#5e3a1e');
+    offctx.fillStyle = hG;
+    offctx.beginPath();
+    offctx.ellipse(0, 90, 172, 148, 0, 0, 7);
+    offctx.fill();
+    offctx.beginPath();
+    offctx.ellipse(-85, 280, 74, 70, 0, 0, 7);
+    offctx.fill();
+    offctx.beginPath();
+    offctx.ellipse(82, 280, 74, 70, 0, 0, 7);
+    offctx.fill();
+    offctx.restore();
+  }
+  if (spider.qt > 0.01) {
+    offctx.save();
+    offctx.globalAlpha = spider.qt;
+    offctx.translate(0, 90);
+    offctx.scale(3.3 * (0.9 + 0.1 * Math.sin(spider.phase * 0.5)), 3.3 * (0.9 + 0.1 * Math.sin(spider.phase * 0.5)));
+    offctx.translate(-154, -150);
+    const fG = offctx.createRadialGradient(-80, -100, 20, 0, 0, 160);
+    fG.addColorStop(0, '#e8cfa8');
+    fG.addColorStop(0.6, '#b5834e');
+    fG.addColorStop(1, '#6e4526');
+    offctx.fillStyle = fG;
+    offctx.beginPath();
+    offctx.ellipse(0, 0, 160, 150, 0, 0, 7);
+    offctx.fill();
+    const eyes = [[139,158,12.5],[170,158,12.5],[117,150,7.5],[192,150,7.5],[112,136,4],[197,136,4]];
+    const blink = spider.sleep > 0.4 ? 1 : (spider.blinkT > 0 ? 1 : 0);
+    for (const [ex, ey, er] of eyes) {
+      offctx.fillStyle = '#1a0e06';
+      offctx.beginPath();
+      offctx.arc(ex, ey, er, 0, 7);
+      offctx.fill();
+      offctx.fillStyle = 'rgba(255,255,255,.85)';
+      offctx.beginPath();
+      offctx.arc(ex - er * 0.3, ey - er * 0.3, er * 0.3, 0, 7);
+      offctx.fill();
+      if (blink > 0.5) {
+        offctx.fillStyle = '#6e4526';
+        offctx.beginPath();
+        offctx.arc(ex, ey, er + 1, 0, Math.PI);
+        offctx.fill();
+        offctx.strokeStyle = 'rgba(40,22,12,.7)';
+        offctx.lineWidth = 2;
+        offctx.beginPath();
+        offctx.arc(ex, ey, er + 1, 0, Math.PI);
+        offctx.stroke();
+      }
+    }
+    offctx.strokeStyle = 'rgba(60,32,16,.7)';
+    offctx.lineWidth = 4;
+    offctx.beginPath();
+    offctx.arc(154, 185, 14, 0.2, Math.PI - 0.2);
+    offctx.stroke();
+    offctx.restore();
+  }
+  if (spider.sleep > 0.4) {
+    offctx.save();
+    offctx.globalAlpha = spider.sleep;
+    for (let z = 0; z < 3; z++) {
+      const c = (time * 0.4 + z / 3) % 1;
+      const rise = c * 70;
+      const zx = 260 + c * 40, zy = -170 - rise;
+      offctx.font = `700 ${(12 + 14 * c) * 3.3}px system-ui`;
+      offctx.fillStyle = 'rgba(0,0,0,.25)';
+      offctx.fillText('z', zx + 2, zy + 2);
+      offctx.fillStyle = `rgba(255,255,255,${Math.sin(Math.PI * c)})`;
+      offctx.fillText('z', zx, zy);
+    }
+    offctx.restore();
+  }
+  const h = spider.jumpH;
+  const shadowScale = 1 + h / 260;
+  ctx.save();
+  ctx.translate(spider.x, spider.y);
+  ctx.shadowColor = `rgba(0,0,0, ${0.42 - Math.min(0.24, h / 500)})`;
+  ctx.shadowBlur = 7 + 0.14 * h;
+  ctx.shadowOffsetX = 5 + 0.35 * h;
+  ctx.shadowOffsetY = 9 + 0.6 * h;
+  ctx.scale(shadowScale, shadowScale);
+  ctx.drawImage(off, -off.width / 2, -off.height / 2, off.width, off.height);
+  ctx.restore();
+}
+
+/* ---------------- silk creation ---------------- */
+let attachTimer = 0;
+function updateSilk(dt) {
+  const k = K();
+  const sp = SP.spinneret;
+  const [sx, sy] = fromBody(sp[0] - 627, sp[1] - 600);
+  const sX = spider.x + sx * k * 0.12, sY = spider.y + sy * k * 0.12;
+  if (!liveThread) {
+    liveStart = { x: sX, y: sY };
+    liveThread = new Rope(sX, sY, spider.x, spider.y);
+  } else {
+    liveThread.x2 = spider.x; liveThread.y2 = spider.y;
+    liveThread.points[12] = [spider.x, spider.y];
+    liveThread.step(dt, windAt(time, 0));
+  }
+  attachTimer -= dt;
+  if (attachTimer <= 0) {
+    attachTimer = 0.4;
+    if (anchors.length) {
+      let best = null, bestD = 70;
+      for (const an of anchors) {
+        const d = Math.hypot(an.x - sX, an.y - sY);
+        if (d < bestD) { bestD = d; best = an; }
+      }
+      if (best) {
+        const startD = Math.hypot(best.x - liveThread.x1, best.y - liveThread.y1);
+        const threadD = Math.hypot(best.x - liveThread.x2, best.y - liveThread.y2);
+        if (startD > 30 && threadD > 54) {
+          const rope = new Rope(liveThread.x1, liveThread.y1, best.x, best.y);
+          rope.thick = 1.25;
+          ropes.push(rope);
+          vibrateWeb(60, 1.2, best.x, best.y);
+          let nearest = null, nd = 288;
+          for (const an of anchors) {
+            const d = Math.hypot(an.x - best.x, an.y - best.y);
+            if (d < nd && d > 5 && an !== best) { nd = d; nearest = an; }
+          }
+          if (nearest) {
+            const r2 = new Rope(best.x, best.y, nearest.x, nearest.y);
+            r2.thick = 0.7;
+            ropes.push(r2);
+          }
+          if (Math.random() < 0.75) {
+            let n2 = null, nd2 = 204;
+            for (const an of anchors) {
+              const d = Math.hypot(an.x - best.x, an.y - best.y);
+              if (d < nd2 && d > 45 && an !== best) { nd2 = d; n2 = an; }
+            }
+            if (n2) {
+              const r3 = new Rope(best.x, best.y, n2.x, n2.y);
+              r3.thick = 0.85;
+              ropes.push(r3);
+            }
+          }
+          liveThread.x1 = best.x; liveThread.y1 = best.y;
+          liveThread.points[0] = [best.x, best.y];
+        }
+      }
+    } else {
+      if (Math.random() < 0.15) {
+        const px = Math.random() * Wp, py = Math.random() * Hp;
+        const rope = new Rope(liveThread.x1, liveThread.y1, px, py);
+        rope.thick = 0.9;
+        ropes.push(rope);
+        liveThread.x1 = px; liveThread.y1 = py;
+        liveThread.points[0] = [px, py];
+      }
+    }
+  }
+  for (const r of ropes) r.fade = Math.max(0, r.fade - dt / 90);
+  ropes = ropes.filter(r => r.fade > 0.01);
+  shadowCanvas.width = Wp; shadowCanvas.height = Hp;
+  shadowCtx.clearRect(0, 0, Wp, Hp);
+  shadowCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  shadowCtx.shadowColor = 'rgba(8,14,70,.42)';
+  shadowCtx.shadowBlur = 3.5;
+  shadowCtx.shadowOffsetX = 7;
+  shadowCtx.shadowOffsetY = 11;
+  for (const r of ropes) {
+    for (let i = 0; i < r.n; i++) {
+      const a = r.points[i], b = r.points[i+1];
+      shadowCtx.strokeStyle = 'rgba(0,0,0,1)';
+      shadowCtx.lineWidth = r.thick;
+      shadowCtx.beginPath(); shadowCtx.moveTo(a[0], a[1]); shadowCtx.lineTo(b[0], b[1]); shadowCtx.stroke();
+    }
+  }
+  shadowCtx.globalCompositeOperation = 'destination-in';
+  shadowCtx.drawImage(maskCanvas, 0, 0, Wp, Hp);
+  shadowCtx.globalCompositeOperation = 'source-over';
+}
+const shadowCanvas = document.createElement('canvas');
+const shadowCtx = shadowCanvas.getContext('2d');
+
+function windAt(t, y) {
+  return (Math.sin(0.45 * t) * 0.6 + Math.sin(1.3 * t + 1.7) * 0.4) * (0.6 + 0.4 * Math.sin(1.1 * t + 0.012 * y)) * 22;
+}
+
+/* ---------------- clear web ---------------- */
+function clearWeb() {
+  for (const r of ropes) {
+    for (const d of r.dew) if (!d.splat) { d.fall = true; const i0 = Math.floor(d.f * r.n); d.x = r.points[i0][0]; d.y = r.points[i0][1]; d.vy = 0; }
+  }
+  ropes = [];
+  if (liveThread) { liveThread = null; liveStart = { x: spider.x, y: spider.y }; }
+  vibrateWeb(200, 4, spider.x, spider.y);
+}
+
+/* ---------------- input ---------------- */
+window.addEventListener('pointermove', e => {
+  pointer.x = e.clientX; pointer.y = e.clientY;
+  pointer.active = true;
+  const now = performance.now() / 1000;
+  if (now - pointer.lastMove > 0.25) pointer.movedSinceSleep = true;
+  pointer.lastMove = now;
+  if (!fly) initFly();
+});
+let touchInterval = null;
+window.addEventListener('pointerdown', e => {
+  pointer.down = true;
+  pointer.holdT = 0;
+  if (e.pointerType === 'touch') {
+    touchInterval = setInterval(() => {
+      pointer.holdT += 0.05;
+      if (pointer.holdT >= 0.65) { clearWeb(); navigator.vibrate && navigator.vibrate(30); }
+    }, 50);
+  }
+  if (e.target.closest('button, a, input, [data-no-spider]')) return;
+  if (!fly) initFly();
+});
+window.addEventListener('pointerup', e => {
+  pointer.down = false;
+  clearInterval(touchInterval);
+  if (e.target.closest('button, a, input, [data-no-spider]')) return;
+  if (pointer.holdT < 0.65) jumpToFly();
+});
+window.addEventListener('pointercancel', () => { clearInterval(touchInterval); });
+window.addEventListener('pointerleave', () => { fly = null; pointer.active = false; });
+
+function jumpToFly() {
+  if (!fly) return;
+  const k = K();
+  const mouthX = spider.x + Math.cos(spider.heading) * 360 * k;
+  const mouthY = spider.y + Math.sin(spider.heading) * 360 * k;
+  const dx = fly.x - mouthX, dy = fly.y - mouthY;
+  const d = Math.hypot(dx, dy);
+  const maxD = 360 * k;
+  let tx = fly.x, ty = fly.y;
+  if (d > maxD) { tx = mouthX + dx / d * maxD; ty = mouthY + dy / d * maxD; }
+  spider.jumping = true;
+  spider.jumpFrom = [spider.x, spider.y];
+  spider.jumpTo = [tx, ty];
+  spider.jumpPeak = Math.max(22, Math.min(130, 0.3 * Math.hypot(tx - spider.x, ty - spider.y)));
+  spider.jumpDur = Math.max(0.28, Math.min(0.6, Math.hypot(tx - spider.x, ty - spider.y) / 1100));
+  spider.jumpT = 0;
+  const flyD = Math.hypot(fly.x - tx, fly.y - ty);
+  if (flyD < 55 * flySize()) {
+    spider.caught = fly;
+    spider.catchT = 3 + Math.random() * 1.2;
+  }
+  flyObj.recoil = 0.6;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); clearWeb(); }
+  }
+});
+window.addEventListener('dblclick', e => {
+  if (e.target.closest('button, a, input')) return;
+  jumpToFly();
+});
+
+/* ---------------- main loop ---------------- */
+let time = 0;
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.033, (now - last) / 1000);
+  last = now;
+  time += dt;
+  computeScale();
+  if (!fly && pointer.active && pointer.x > -50) initFly();
+  if (fly) updateFly(dt);
+  updateObjects(dt);
+  updateSpider(dt);
+  updateSilk(dt);
+
+  ctx.clearRect(0, 0, Wp, Hp);
+  ctx.drawImage(shadowCanvas, 0, 0, Wp, Hp);
+  if (liveThread) liveThread.draw();
+  for (const r of ropes) r.draw();
+  for (const r of ropes) {
+    for (const d of r.dew) {
+      if (d.splat) {
+        ctx.fillStyle = 'rgba(255,255,255,.5)';
+        ctx.beginPath(); ctx.arc(d.x, d.y, d.r * 0.8, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,.12)';
+        ctx.beginPath(); ctx.ellipse(d.x, d.y + d.r * 0.6, d.r * 0.9, d.r * 0.35, 0, 0, 7); ctx.fill();
+      }
+    }
+  }
+  drawSpider();
+  if (fly) drawFly();
+  requestAnimationFrame(loop);
+}
+
+resize();
+initSpider();
+collectObjects();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
