@@ -1250,7 +1250,6 @@ function loop(now) {
   }
   drawSpider();
   if (fly) drawFly();
-  window.__dbg = { anchors: anchors.length, ropes: ropes.length, live: !!liveThread, spider: [Math.round(spider.x), Math.round(spider.y)], fly: !!fly };
   requestAnimationFrame(loop);
 }
 
